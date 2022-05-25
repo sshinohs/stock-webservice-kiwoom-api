@@ -6,11 +6,8 @@ app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
 engine = db.create_engine(app.config['DB_URL'], encoding='utf-8')
-# app.database = database
 
-# app.database.execute().lastrowid
-
-CORS(app, resources={r'*': {'origins': 'http://localhost:3000'}})
+CORS(app, resources={r'*': {'origins': ['http://localhost:3000', 'http://127.0.0.1:3000']}})
 
 connection = engine.connect()
 metadata = db.MetaData()
@@ -45,7 +42,6 @@ print('삼성전자 찾기')
 print(result_set[:10])
 
 print(table.columns.keys())
-
 
 
 @app.route('/hello_world')
