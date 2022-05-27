@@ -2,9 +2,7 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QAxContainer import *
 from PyQt5.QtCore import *
-import json
 import time
-import pandas as pd
 
 TR_REQ_TIME_INTERVAL = 0.2
 
@@ -78,55 +76,28 @@ class Kiwoom(QAxWidget):
         data_cnt = self._get_repeat_cnt(trcode, rqname)
 
         for i in range(data_cnt):
-            date_val = self._comm_get_data(trcode, "", rqname, i, "일자")
-            open_val = self._comm_get_data(trcode, "", rqname, i, "시가")
-            high_val = self._comm_get_data(trcode, "", rqname, i, "고가")
-            low_val = self._comm_get_data(trcode, "", rqname, i, "저가")
-            close_val = self._comm_get_data(trcode, "", rqname, i, "현재가")
-            volume_val = self._comm_get_data(trcode, "", rqname, i, "거래량")
-            # print(date_val, open_val, high_val, low_val, close_val, volume_val)
-
-            self.ohlcv['date'].append(date_val)
-            self.ohlcv['open'].append(int(open_val))
-            self.ohlcv['high'].append(int(high_val))
-            self.ohlcv['low'].append(int(low_val))
-            self.ohlcv['close'].append(int(close_val))
-            self.ohlcv['volume'].append(int(volume_val))
-
+            date = self._comm_get_data(trcode, "", rqname, i, "일자")
+            open = self._comm_get_data(trcode, "", rqname, i, "시가")
+            high = self._comm_get_data(trcode, "", rqname, i, "고가")
+            low = self._comm_get_data(trcode, "", rqname, i, "저가")
+            close = self._comm_get_data(trcode, "", rqname, i, "현재가")
+            volume = self._comm_get_data(trcode, "", rqname, i, "거래량")
+            print(date, open, high, low, close, volume)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     kiwoom = Kiwoom()
     kiwoom.comm_connect()
 
-    kiwoom.ohlcv = {'date': [], 'open': [], 'high': [], 'low': [], 'close': [], 'volume': []}
-
-    item_code = "005930"
-    recent_date = "20220527"
-
-    # opt 10081 TR 요청
-    kiwoom.set_input_value("종목코드", item_code)
-    kiwoom.set_input_value("기준일자", recent_date)
+    # opt10081 TR 요청
+    kiwoom.set_input_value("종목코드", "039490")
+    kiwoom.set_input_value("기준일자", "20170224")
     kiwoom.set_input_value("수정주가구분", 1)
     kiwoom.comm_rq_data("opt10081_req", "opt10081", 0, "0101")
 
     while kiwoom.remained_data == True:
         time.sleep(TR_REQ_TIME_INTERVAL)
-        kiwoom.set_input_value("종목코드", item_code)
-        kiwoom.set_input_value("기준일자", recent_date)
+        kiwoom.set_input_value("종목코드", "039490")
+        kiwoom.set_input_value("기준일자", "20170224")
         kiwoom.set_input_value("수정주가구분", 1)
         kiwoom.comm_rq_data("opt10081_req", "opt10081", 2, "0101")
-
-    print('why')
-    df = pd.DataFrame(kiwoom.ohlcv, columns=['date', 'open', 'high', 'low', 'close', 'volume'])
-    df.to_json('삼성전자.json', orient='records')
-
-    print('the end')
-
-
-    # code_list = kiwoom.get_code_list_by_market('0')
-    # ham = {}
-    # for code in code_list:
-    #     ham[code] = kiwoom.get_master_code_name(code)
-    # with open('./file/ham.json', 'w') as f:
-    #     f.write(json.dumps(ham, ensure_ascii=False))
