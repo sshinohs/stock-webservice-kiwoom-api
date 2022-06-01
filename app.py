@@ -42,6 +42,41 @@ def item_search():
         return jsonify(result_list)
 
 
+@app.route('/item/<param>')
+def item_info(param):
+    query = f"SELECT * FROM `{param}`;"
+    result_proxy = connection.execute(query)
+    result_set = result_proxy.fetchall()
+
+    result_list = []
+    for result in result_set:
+        result_list.append({
+            'date': result.date,
+            'open': result.open,
+            'high': result.high,
+            'low': result.low,
+            'close': result.close,
+            'volume': result.volume
+        })
+    return jsonify(result_list)
+
+
+def item_search():
+    order = request.args.get('keyword')
+    if order:
+        query = f"SELECT * FROM items WHERE name LIKE '%{order}%';"
+        result_proxy = connection.execute(query)
+        result_set = result_proxy.fetchall()
+
+        result_list = []
+        for result in result_set:
+            result_list.append({
+                'name': result.name,
+                'code': result.code
+            })
+        return jsonify(result_list)
+
+
 @app.route('/echo_call/<param>')
 def get_echo_call(param):
     return jsonify({"param": param})
